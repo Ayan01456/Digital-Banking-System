@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * name: The service name (used for logging/debugging)
  * url: The exact address of your Auth Service
  */
-@FeignClient(name = "auth-service", url = "${AUTH_SERVICE_URL}")
+@FeignClient(name = "auth-service", url = "${auth.service.url}")
 public interface AuthClient {
 
     /**

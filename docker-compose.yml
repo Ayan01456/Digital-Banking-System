@@ -1,0 +1,48 @@
+
+
+services:
+  # The Database Service
+  db:
+    image: postgres:15
+    container_name: banking-db-container
+    environment:
+      POSTGRES_DB: banking_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+
+  # The Auth Microservice
+  auth-service:
+    build: ./auth-service
+    container_name: auth-service-container
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/banking_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=password
+      - APP_JWT_SECRET=404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+      - APP_JWT_EXPIRATION=2592000000
+    depends_on:
+      - db
+
+  # The Account Microservice
+  account-service:
+    build: ./account-service
+    container_name: account-service-container
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/banking_db
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=password
+      # This tells Account service to look for 'auth-service' inside the Docker network
+      - AUTH_SERVICE_URL=http://auth-service:8080
+      - APP_JWT_SECRET=404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+      - APP_JWT_EXPIRATION=2592000000
+    depends_on:
+      - db
+      - auth-service

@@ -47,7 +47,8 @@ public class SecurityConfig {
             "http://localhost:5500", 
             "http://127.0.0.1:5500", 
             "http://localhost:8081",
-            "http://localhost:3000"
+            "http://localhost:3000",
+            "https://digital-banking-system-ten.vercel.app"
         ));
         
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));

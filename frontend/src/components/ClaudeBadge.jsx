@@ -11,7 +11,7 @@ export default function ClaudeBadge() {
   return (
     <div className="badge-stack">
       <a
-        href="https://github.com/Ayan01456"
+        href="https://github.com/Ayan01456/Digital-Banking-System"
         className="github-badge"
         target="_blank"
         rel="noopener noreferrer"

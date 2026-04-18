@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:8080/api/auth";
+const BASE_URL = "https://observant-light-production-fc7b.up.railway.app/api/auth";
 
 export const loginUser = async (username, password) => {
   const response = await fetch(`${BASE_URL}/login`, {

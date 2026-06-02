@@ -1,14 +1,22 @@
-# Stage 1: Build the Maven project
-FROM maven:3.8.7-eclipse-temurin-17 AS build
+FROM python:3.11-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
 WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
+
 COPY . .
-RUN mvn clean package -DskipTests
 
-# Stage 2: Create the final lightweight image
-FROM eclipse-temurin:17-jre-jammy
-WORKDIR /app
-# This copies the generated .jar file from the build stage to the final image
-COPY --from=build /app/target/*.jar app.jar
+EXPOSE 8000
 
-# Set the timezone to Asia/Kolkata for transactional consistency
-ENTRYPOINT ["java", "-Duser.timezone=Asia/Kolkata", "-jar", "app.jar"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

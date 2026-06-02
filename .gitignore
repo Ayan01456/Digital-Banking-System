@@ -2,3 +2,10 @@ node_modules/
 target/
 .env
 *.log
+_pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+target/
+.alpine-keep

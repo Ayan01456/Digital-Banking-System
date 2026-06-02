@@ -1,48 +1,50 @@
-
+version: '3.8'
 
 services:
-  # The Database Service
-  db:
-    image: postgres:15
-    container_name: banking-db-container
+  auth-db:
+    image: postgres:15-alpine
     environment:
-      POSTGRES_DB: banking_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      POSTGRES_USER: auth_user
+      POSTGRES_PASSWORD: auth_password_123
+      POSTGRES_DB: auth_db
     ports:
-      - "5432:5432"
+      - "5433:5432"
+    volumes:
+      - auth_db_data:/var/lib/postgresql/data
 
-  # The Auth Microservice
+  account-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: account_user
+      POSTGRES_PASSWORD: account_password_123
+      POSTGRES_DB: account_ledger_db
+    ports:
+      - "5434:5432"
+    volumes:
+      - account_db_data:/var/lib/postgresql/data
+
   auth-service:
-    build: ./auth-service
-    container_name: auth-service-container
-    restart: always
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
     ports:
-      - "8080:8080"
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/banking_db
-      - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=password
-      - APP_JWT_SECRET=404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
-      - APP_JWT_EXPIRATION=2592000000
+      - "8000:8000"
     depends_on:
-      - db
+      - auth-db
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://auth_user:auth_password_123@auth-db:5432/auth_db
 
-  # The Account Microservice
   account-service:
-    build: ./account-service
-    container_name: account-service-container
-    restart: always
+    build:
+      context: ./account-service
+      dockerfile: Dockerfile
     ports:
-      - "8081:8081"
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/banking_db
-      - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=password
-      # This tells Account service to look for 'auth-service' inside the Docker network
-      - AUTH_SERVICE_URL=http://auth-service:8080
-      - APP_JWT_SECRET=404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
-      - APP_JWT_EXPIRATION=2592000000
+      - "8001:8001"
     depends_on:
-      - db
-      - auth-service
+      - account-db
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://account_user:account_password_123@account-db:5432/account_ledger_db
+
+volumes:
+  auth_db_data:
+  account_db_data:
